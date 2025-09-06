@@ -9,12 +9,33 @@ use App\Http\Controllers\ProviderController;
 | API Routes
 |--------------------------------------------------------------------------
 |
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
+| اینجا تمام روت‌های API پروژه تعریف می‌شوند. این روت‌ها بدون
+| استفاده از View هستند و JSON پاسخ می‌دهند.
+|
+| برای تست در مرورگر:
+| - روت‌هایی که POST دارند، باید با ابزارهایی مثل Postman یا 
+|   جاوااسکریپت (Fetch/Axios) تست شوند.
+| - روت‌های GET می‌توانند مستقیم در مرورگر باز شوند.
 |
 */
 
+// لاگین کاربر (POST)
 Route::post('/login', [AuthController::class, 'login']);
+
+// به‌روزرسانی موقعیت ارائه‌دهنده خدمات (POST)
 Route::post('/provider/location/update', [ProviderController::class, 'updateLocation']);
+
+// دریافت ارائه‌دهنده‌های نزدیک (GET)
 Route::get('/providers/nearby', [ProviderController::class, 'getNearby']);
+
+/*
+|--------------------------------------------------------------------------
+| نکته برای تست مستقیم در مرورگر
+|--------------------------------------------------------------------------
+|
+| مرورگر به طور مستقیم فقط GET را می‌فرستد. بنابراین:
+| - برای تست POST از Postman، Insomnia یا جاوااسکریپت استفاده کنید.
+| - اگر بخواهید، می‌توانید یک روت GET موقت برای تست داده‌های POST بسازید،
+|   ولی این فقط برای توسعه و تست است و در محیط واقعی حذف شود.
+|
+*/
