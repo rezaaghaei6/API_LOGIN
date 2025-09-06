@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -18,13 +19,19 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['status' => 'error', 'message' => $validator->errors()], 400);
+            return response()->json([
+                'status' => 'error', 
+                'message' => $validator->errors()->first()
+            ], 400);
         }
 
         $user = User::where('phone', $request->phone)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['status' => 'error', 'message' => 'Invalid credentials'], 401);
+            return response()->json([
+                'status' => 'error', 
+                'message' => 'Invalid credentials'
+            ], 401);
         }
 
         $payload = [
@@ -33,8 +40,24 @@ class AuthController extends Controller
             'exp' => time() + 3600, // 1 hour expiration
         ];
 
-        $token = JWT::encode($payload, env('JWT_SECRET'), 'HS256');
+        $jwtSecret = env('JWT_SECRET');
+        if (!$jwtSecret) {
+            return response()->json([
+                'status' => 'error', 
+                'message' => 'JWT secret not configured'
+            ], 500);
+        }
 
-        return response()->json(['status' => 'success', 'token' => $token]);
+        $token = JWT::encode($payload, $jwtSecret, 'HS256');
+
+        return response()->json([
+            'status' => 'success', 
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'phone' => $user->phone,
+                'role' => $user->role
+            ]
+        ]);
     }
 }
